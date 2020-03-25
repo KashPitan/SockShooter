@@ -4,7 +4,12 @@ var socket = io.connect();
 //document elements
 var joinButton = document.getElementById("joinButton");
 var nameInput = document.getElementById("nameInput");
+var canvas = document.getElementById("canvas");
+
 var userName;
+var mousePos;
+//failed attempt at a shared constatns file between client and server
+// const SharedConsts = require("../shared/constants");
 
 
 var movement = {
@@ -12,6 +17,14 @@ var movement = {
     down: false,
     left: false,
     right: false
+}
+
+function getMousePos(canvas, evt) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+      x: evt.clientX - rect.left,
+      y: evt.clientY - rect.top
+    };
 }
 
 document.addEventListener('keydown', function(event) {
@@ -47,11 +60,17 @@ document.addEventListener('keyup', function(event) {
         break;
     }
   });
-  
+
+document.addEventListener("mousemove",function(event){
+  mousePos = getMousePos(canvas,event);
+  // console.log(mousePos);
+});
+
+
   //shoot a bullet when the spacebar is pressed
   document.addEventListener("keydown", function(event){
     if(event.keyCode === 32 ){
-        socket.emit("shoot");
+      socket.emit("shoot", mousePos);
     }
   });
 
@@ -74,8 +93,6 @@ document.addEventListener('keyup', function(event) {
 setInterval(function(){
     for (const key in movement) {
         if(movement[key] === true){
-            // console.log(key)
-            // socket.emit("game", key);
             socket.emit("movement", movement);
         }
     }
@@ -87,7 +104,6 @@ socket.on("game",function(data){
 })
 
 //creates the canvas using the html element
-var canvas = document.getElementById("canvas");
 canvas.width = 400;
 canvas.height = 400;
 
@@ -96,7 +112,7 @@ var context = canvas.getContext("2d");
 
 /*whenever a state message is receieved from the server
 updates the whole canvas*/
-socket.on("state", function(players,projectiles){
+socket.on("state", function(players){
     
     //context.  draws stuff to canvas
 
@@ -109,28 +125,21 @@ socket.on("state", function(players,projectiles){
     //loop used to draw each player to the canvas
     for (var id in players) {
         var player = players[id];
-        context.beginPath();
+        // console.log(player.projectiles);
+
+        //draw each projectile the player has spawned
+        player.projectiles.forEach(element => {
+            context.beginPath();
+            context.arc(element.location.x,element.location.y,5,0,2*Math.PI);
+            context.fill();
+            // context.stroke();
+        });
 
         //simply put this creates a circle
-        context.arc(player.x,player.y,10,0,2*Math.PI);
-        context.fill();
-        context.fillText(player.name,player.x-10,player.y-12);
-    }
-    console.log(projectiles);
-    // console.log(players);
-    projectiles.forEach(element => {
-        console.log("project");
-        // var projectile = projectiles[id];
         context.beginPath();
-        context.arc(element.x,element.y,10,0,2*Math.PI);
+        context.arc(player.location.x,player.location.y,10,0,2*Math.PI);
         context.fill();
-    });
+        context.fillText(player.name,player.location.x-10,player.location.y-12);
+    }
     
-    for(var id in projectiles){
-        var projectile = projectiles[id];
-        context.beginPath();
-        context.arc(projectile.x,projectile.y,10,0,2*Math.PI);
-        context.fill();
-        // context.fillText(player.name,player.x-10,player.y-12);
-    }
 })
