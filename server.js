@@ -95,6 +95,7 @@ IO.on("connection", function(socket){
       if((players[socket.id] != undefined)){
         var player = players[socket.id];
          player.shoot(data);
+         console.log(player.location);
       }else{
         console.log("spawn before shooting")
       }

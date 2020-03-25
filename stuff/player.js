@@ -36,8 +36,8 @@ var Player = function(name,socketId){
       projectileUpdate: function(){
         this.projectiles.forEach(element => {
           element.update();
-          if(((element.location.x || element.location.y) < 0)
-            || ((element.location.x || element.location.y) > 400)){
+          if((element.location.x < 0 || element.location.y < 0)
+            || (element.location.x > 400 || element.location.y > 400)){
               var index = this.projectiles.indexOf(element);
               this.projectiles.splice(index,1);
               console.log("projectile deleted")
