@@ -1,10 +1,11 @@
 //function for creating projectiles
-var Projectile = function(id,origin,updateVector){
+var Projectile = function(id,origin,updateVector,projectileId){
     var self = {
       id : id,
+      projectileId: projectileId,
       origin:origin,
       location: {x:origin.x,y:origin.y},
-      velocity: 10,
+      velocity: 5,
       updateVector: updateVector,
       update: function(){
         // console.log(this.updateVector);

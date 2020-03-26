@@ -112,7 +112,7 @@ var context = canvas.getContext("2d");
 
 /*whenever a state message is receieved from the server
 updates the whole canvas*/
-socket.on("state", function(players){
+socket.on("state", function(players,projectiles){
     
     //context.  draws stuff to canvas
 
@@ -122,19 +122,26 @@ socket.on("state", function(players){
     //colour to fill objects on the canvas
     context.fillStyle = "blue";
 
-    //loop used to draw each player to the canvas
+    
+    //draw each projectile the player has spawned
+    projectiles.forEach(element => {
+      context.beginPath();
+      context.arc(element.location.x,element.location.y,5,0,2*Math.PI);
+      context.fill();
+      // context.stroke();
+  });
+
+    // //loop used to draw each player to the canvas
+    // players.forEach(player => {
+    //   console.log(player);
+    //   context.beginPath();
+    //   context.arc(player.location.x,player.location.y,10,0,2*Math.PI);
+    //   context.fill();
+    //   context.fillText(player.name,player.location.x-10,player.location.y-12);
+    // });
     for (var id in players) {
         var player = players[id];
-        // console.log(player.projectiles);
-
-        //draw each projectile the player has spawned
-        player.projectiles.forEach(element => {
-            context.beginPath();
-            context.arc(element.location.x,element.location.y,5,0,2*Math.PI);
-            context.fill();
-            // context.stroke();
-        });
-
+        
         //simply put this creates a circle
         context.beginPath();
         context.arc(player.location.x,player.location.y,10,0,2*Math.PI);
