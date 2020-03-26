@@ -5,17 +5,24 @@ var Player = function(name,socketId){
       socketId: socketId,
       health: 3,
       name : name,
-      location:{x:300,y:300},
+      alive: false,
+      location:{
+        x:Math.floor(Math.random()*400)+1,
+        y:Math.floor(Math.random()*400)+1
+      },
       projectiles :[],
+      kills: 0,
+      deaths: 0,
       //creates a projectile
       shoot: function(destination){
-        if(this.projectiles.length < 3){
-          
-          var projectile = Projectile(this.socketId,
-            this.location,this.calcProjectileVector(destination));
-          
-          this.projectiles.push(projectile);
-        }
+        var projectile = Projectile(this.socketId,
+          this.location,
+          this.calcProjectileVector(destination),
+          this.projectiles.length);
+        
+        this.projectiles.push(projectile);
+        // console.log(projectile);
+        return projectile;
       },
       //function for normalising vector of projectile
       calcProjectileVector(destination){
@@ -33,17 +40,16 @@ var Player = function(name,socketId){
         return updateVector
       },
       //update projectile position so they fly
-      projectileUpdate: function(){
-        this.projectiles.forEach(element => {
-          element.update();
-          if((element.location.x < 0 || element.location.y < 0)
-            || (element.location.x > 400 || element.location.y > 400)){
-              var index = this.projectiles.indexOf(element);
-              this.projectiles.splice(index,1);
-              console.log("projectile deleted")
-          }
-        });
-      }
+      // projectileUpdate: function(){
+      //   this.projectiles.forEach(element => {
+      //     element.update();
+      //     if((element.location.x < 0 || element.location.y < 0)
+      //       || (element.location.x > 400 || element.location.y > 400)){
+      //         var index = this.projectiles.indexOf(element);
+      //         this.projectiles.splice(index,1);
+      //     }
+      //   });
+      // }
     }
     return self;
   }

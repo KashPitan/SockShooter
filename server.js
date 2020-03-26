@@ -9,7 +9,8 @@ const Projectile = require("./stuff/projectile");
 const Player = require("./stuff/player");
 const Movement = require("./stuff/movement");
 
-const SharedConsts = require("./shared/constants");
+// const SharedConsts = require("./shared/constants");
+const Collisions = require("./stuff/collisions");
 
 const App = Express();
 
@@ -21,21 +22,46 @@ App.use(Express.static("public"));
 
 var IO = Socket(Server);
 
+//updates per ssecond
 var FPS = 30;
-
-//function to call for updating game state
-function update(){
-  
-  for (var id in players) {
-    var player = players[id];
-    player.projectileUpdate();
-  }
-  //constantly emits all the player data to all the other players
-  IO.sockets.emit("state",players);  
-}
 
 //array of player objects
 var players = {};
+var projectiles = [];
+// var projectiles2 = new Map();
+
+//function to call for updating game state
+function update(){
+  projectileUpdate();
+  Collisions(players,projectiles);
+  // for (var id in players) {
+  //   var player = players[id];
+  //   player.projectileUpdate();
+  // }
+  //constantly emits all the player and projectile data to all the other players
+  IO.sockets.emit("state",players,projectiles);  
+}
+
+
+//updates projectile locations
+function projectileUpdate(){
+  projectiles.forEach(element => {
+    // console.log(element);
+    element.update();
+    if((element.location.x < 0 || element.location.y < 0)
+    || (element.location.x > 400 || element.location.y > 400)){
+      //index of element in array on server
+      var index = projectiles.indexOf(element);
+      projectiles.splice(index,1);     
+      // console.log(element.projectileId);
+
+      //index of element in array on player object
+      var index2 = players[element.id].projectiles.indexOf(element);
+      players[element.id].projectiles.splice(index2,1)
+      
+    } 
+  });
+}
 
 //functions to run when a user has made a connection
 IO.on("connection", function(socket){
@@ -48,31 +74,53 @@ IO.on("connection", function(socket){
 
     //when a new player message is sent
     socket.on("new player", function(data){
+      //add a new player to the game
         players[socket.id] = Player(data,socket.id);
         // console.log("new player added " + socket.id)
-        //a new player is added to the array and spawned at coordinates below
     });
 
     //when a movement message is received updates the players position
     socket.on("movement", function(data){
+      //if the user hasnt spawned in exit the function to prevent crashing
+        if(players[socket.id]===undefined){
+          return;
+        }
         var player = players[socket.id] || {};
 
         //distance for player to be moved
         var xval = 0;
         var yval = 0;
         var moveDist = 2;        
-        
+
+        //if the user is pressing a direction key
+        //then checks if user is at edge of map before updating location
           if (data.left) {
-            xval += -moveDist;
+            if(player.location.x === 0){
+              xval = 0;
+            }else{
+              xval += -moveDist;
+            }
           }
           if (data.up) {
-            yval += -moveDist;
+            if(player.location.y === 0){
+              yval = 0;
+            }else{
+              yval += -moveDist;
+            }
           }
           if (data.right) {
-            xval += moveDist;
+            if(player.location.x === 400){
+              xval = 0;
+            }else{
+              xval += moveDist;
+            }          
           }
           if (data.down) {
-            yval += moveDist;
+            if(player.location.y === 400){
+              yval = 0;
+            }else{
+              yval += moveDist;
+            }    
           }
           
           // console.log("before",xval,yval);
@@ -94,8 +142,14 @@ IO.on("connection", function(socket){
       //only allows a bullet to be spawned if the user has spawned
       if((players[socket.id] != undefined)){
         var player = players[socket.id];
-         player.shoot(data);
-         console.log(player.location);
+        //creates a projectile and adds it to server side projectile array
+        //only spawns a bullet if the player has less than 3 on screen already
+        if(player.projectiles.length < 5){
+          projectiles.push(player.shoot(data));
+          // console.log("spawning projectile");
+          // console.log(projectiles);
+        }
+        
       }else{
         console.log("spawn before shooting")
       }
