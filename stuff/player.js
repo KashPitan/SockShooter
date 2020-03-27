@@ -1,11 +1,13 @@
 const Projectile = require("./projectile");
 //function for creating a new player object
-var Player = function(name,socketId){
+var Player = function(name,socketId,colour){
     var self = {
       socketId: socketId,
       health: 3,
       name : name,
+      maxShots: 3,
       alive: false,
+      colour: colour,
       location:{
         x:Math.floor(Math.random()*400)+1,
         y:Math.floor(Math.random()*400)+1
@@ -39,17 +41,22 @@ var Player = function(name,socketId){
         }
         return updateVector
       },
-      //update projectile position so they fly
-      // projectileUpdate: function(){
-      //   this.projectiles.forEach(element => {
-      //     element.update();
-      //     if((element.location.x < 0 || element.location.y < 0)
-      //       || (element.location.x > 400 || element.location.y > 400)){
-      //         var index = this.projectiles.indexOf(element);
-      //         this.projectiles.splice(index,1);
-      //     }
-      //   });
-      // }
+      changeColourRandom(){  
+        var red = Math.floor(Math.random()* 255);
+        var green = Math.floor(Math.random() * 255);
+        var blue = Math.floor(Math.random() * 255);
+      
+        this.colour = "rgb("+red+","+green+"," +blue+" )";  
+      },
+      //needed?
+      respawn(){
+        this.location = {
+          x:Math.floor(Math.random()*400)+1,
+          y:Math.floor(Math.random()*400)+1
+        }
+        this.health = 3; 
+        this.alive = true;
+      }
     }
     return self;
   }
