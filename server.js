@@ -90,7 +90,7 @@ IO.on("connection", function(socket){
     //when a movement message is received updates the players position
     socket.on("movement", function(data){
       //if the user hasnt spawned in exit the function to prevent crashing
-        if(players[socket.id]===undefined){
+        if((players[socket.id]===undefined)|| !players[socket.id].alive){
           return;
         }
         var player = players[socket.id] || {};
@@ -99,7 +99,7 @@ IO.on("connection", function(socket){
         var xval = 0;
         var yval = 0;
         //basically velocity?
-        var moveDist = 3;        
+        var moveDist = 6;        
 
         //if the user is pressing a direction key
         //then checks if user is at edge of map before updating location
@@ -161,7 +161,6 @@ IO.on("connection", function(socket){
             }    
           }          
           mapEdgeCollision();
-
           //updates player location
           player.location.x += xval;
           player.location.y += yval;
@@ -171,10 +170,12 @@ IO.on("connection", function(socket){
     //when the user sends a shoot message(receives mouse location as data)
     socket.on("shoot", function(data){
       //only allows a bullet to be spawned if the user has spawned
-      if((players[socket.id] != undefined)){
+      if((players[socket.id] != undefined)
+       && players[socket.id].alive){
         var player = players[socket.id];
         //creates a projectile and adds it to server side projectile array
         //only spawns a bullet if the player has less than 3 on screen already
+        console.log(players[socket.id].alive);
         if(player.projectiles.length < 4){
           projectiles.push(player.shoot(data));
           // console.log("spawning projectile");

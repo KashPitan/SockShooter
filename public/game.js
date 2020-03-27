@@ -100,7 +100,7 @@ setInterval(function(){
             socket.emit("movement", movement);
         }
     }
-},1000/60);
+},1000/30);
 
 //listening for game messages
 socket.on("game",function(data){

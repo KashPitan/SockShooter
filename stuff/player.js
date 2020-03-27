@@ -17,14 +17,16 @@ var Player = function(name,socketId,colour){
       deaths: 0,
       //creates a projectile
       shoot: function(destination){
-        var projectile = Projectile(this.socketId,
-          this.location,
-          this.calcProjectileVector(destination),
-          this.projectiles.length);
-        
-        this.projectiles.push(projectile);
-        // console.log(projectile);
-        return projectile;
+        if(this.alive){
+          var projectile = Projectile(this.socketId,
+            this.location,
+            this.calcProjectileVector(destination),
+            this.projectiles.length);
+          
+          this.projectiles.push(projectile);
+          // console.log(projectile);
+          return projectile;
+        } 
       },
       //function for normalising vector of projectile
       calcProjectileVector(destination){
@@ -50,12 +52,15 @@ var Player = function(name,socketId,colour){
       },
       //needed?
       respawn(){
-        this.location = {
-          x:Math.floor(Math.random()*400)+1,
-          y:Math.floor(Math.random()*400)+1
+        if(!this.alive){
+          this.location = {
+            x:Math.floor(Math.random()*400)+1,
+            y:Math.floor(Math.random()*400)+1
+          }
+          this.health = 3; 
+          this.alive = true;
         }
-        this.health = 3; 
-        this.alive = true;
+        
       }
     }
     return self;
