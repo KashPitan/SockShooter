@@ -34,20 +34,25 @@ var projectiles = [];
 function update(){
   projectileUpdate();
   Collisions(players,projectiles);
-  // for (var id in players) {
-  //   var player = players[id];
-  //   player.projectileUpdate();
-  // }
   //constantly emits all the player and projectile data to all the other players
   IO.sockets.emit("state",players,projectiles);  
 }
 
+//For setting random Colour of user(maybe move to player class)
+function getRandomColour(){
+  var red = Math.floor(Math.random()* 255);
+  var green = Math.floor(Math.random() * 255);
+  var blue = Math.floor(Math.random() * 255);
+
+  return "rgb("+red+","+green+"," +blue+" )";  
+};
 
 //updates projectile locations
 function projectileUpdate(){
   projectiles.forEach(element => {
     // console.log(element);
     element.update();
+    //checks whether projectile collides with edge of map
     if((element.location.x < 0 || element.location.y < 0)
     || (element.location.x > 400 || element.location.y > 400)){
       //index of element in array on server
@@ -66,6 +71,8 @@ function projectileUpdate(){
 //functions to run when a user has made a connection
 IO.on("connection", function(socket){
     console.log("socket connection made", socket.id);
+    //create player upon connection
+    players[socket.id] = Player("",socket.id,getRandomColour());
 
     //game loop
     setInterval(function(){
@@ -73,9 +80,10 @@ IO.on("connection", function(socket){
     },1000/FPS);
 
     //when a new player message is sent
-    socket.on("new player", function(data){
+    socket.on("spawn", function(data){
       //add a new player to the game
-        players[socket.id] = Player(data,socket.id);
+        players[socket.id].name = data;
+        players[socket.id].respawn();
         // console.log("new player added " + socket.id)
     });
 
@@ -90,51 +98,74 @@ IO.on("connection", function(socket){
         //distance for player to be moved
         var xval = 0;
         var yval = 0;
-        var moveDist = 2;        
+        //basically velocity?
+        var moveDist = 3;        
 
         //if the user is pressing a direction key
         //then checks if user is at edge of map before updating location
           if (data.left) {
-            if(player.location.x === 0){
-              xval = 0;
-            }else{
-              xval += -moveDist;
-            }
+            xval += -moveDist;
           }
           if (data.up) {
-            if(player.location.y === 0){
-              yval = 0;
-            }else{
-              yval += -moveDist;
-            }
+            yval += -moveDist;
           }
           if (data.right) {
-            if(player.location.x === 400){
-              xval = 0;
-            }else{
-              xval += moveDist;
-            }          
+            xval += moveDist;       
           }
           if (data.down) {
-            if(player.location.y === 400){
-              yval = 0;
-            }else{
-              yval += moveDist;
-            }    
+            yval += moveDist;  
           }
           
-          // console.log("before",xval,yval);
-          if((xval && yval) != 0){
-            xval *= 0.5;
-            yval *= 0.5;
+          //use normalised vectors to even out diagonal movement speed
+          function normaliseMovement(){
+            var vector = {
+              x: xval,
+              y: yval
+            }
+            //pythagoras to find out vector length
+            var vectorLength = Math.sqrt((vector.x ** 2)+ (vector.y **2));
+            //normalise vector created earlier
+            xval = vector.x/vectorLength;
+            yval = vector.y/vectorLength;
+
+            //returns 0 if value is NaN (when opposing directions are pressed)
+            xval = (xval * moveDist) || 0;
+            yval = (yval * moveDist) || 0;
+            // console.log(xval,yval);
           }
+
+          //my own "algorithm" to even out diagonal movement speed
+          function normaliseMovement2(){
+            if((xval && yval) != 0){
+              xval *= 0.5;
+              yval *= 0.5;
+            }
+            //temporary fix for input speed stacking issue
+            if(data.left && data.right){
+              yval *= 0.5;
+              // console.log(xval,yval);
+            }
+          }
+
+          normaliseMovement2();
+
+          //collision detection for edge of map(hardcoded for now)
+          function mapEdgeCollision(){
+            if(((player.location.x + xval) <= 0) || ((player.location.x + xval) >= 400)){
+              console.log("off x");
+              xval = 0;
+            }
+            if(((player.location.y + yval) >= 400) || ((player.location.y + yval) <= 0)){
+              console.log("off y");
+              yval = 0;
+            }    
+          }          
+          mapEdgeCollision();
 
           //updates player location
           player.location.x += xval;
           player.location.y += yval;
-          // console.log(moveDist)
-          // console.log(yval);
-          // console.log(player.name,player.x,player.y)
+          
     });
 
     //when the user sends a shoot message(receives mouse location as data)
@@ -144,16 +175,14 @@ IO.on("connection", function(socket){
         var player = players[socket.id];
         //creates a projectile and adds it to server side projectile array
         //only spawns a bullet if the player has less than 3 on screen already
-        if(player.projectiles.length < 5){
+        if(player.projectiles.length < 4){
           projectiles.push(player.shoot(data));
           // console.log("spawning projectile");
           // console.log(projectiles);
         }
-        
       }else{
         console.log("spawn before shooting")
       }
-
     });
 
     //listens for "game events"
