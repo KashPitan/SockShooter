@@ -12,9 +12,34 @@ var playerTable = document.createElement("table");
 //failed attempt at a shared constants file between client and server
 // const SharedConsts = require("../shared/constants");
 
+//adds the player stats html element
 var playerStats = document.createElement("p");
+
+//store individual player stats
 var kills;
 var deaths;
+
+//array for storing the top 5 killers
+var topKills = [];
+
+// import leadboard, { leaderboard } from "./leaderboard";
+
+function leaderboard(...players){
+  // players.sort(compare);
+  return players.sort(compare);
+}
+
+function compare(a,b){
+  var playerKillsA = a.kills;
+  var playersKillsB = b.kills;
+  if(playersKillsA > playersKillsB){
+      return 1;
+  }
+  if(playersKillsB > playersKillsA){
+      return -1;
+  }
+  return 0;
+}
 
 var movement = {
     up: false,
@@ -127,13 +152,8 @@ updates the whole canvas*/
 socket.on("state", function(players,projectiles){
   
   //context.  draws stuff to canvas
-
-  //this clears the canvas within the given coordinates
+  //this clears the canvas within the given coordinates before the next update
   context.clearRect(0,0,400,400);
-
-  //colour to fill objects on the canvas
-  // context.fillStyle = playerColour;
-
   
   //draw each projectile the player has spawned
   projectiles.forEach(element => {
@@ -153,15 +173,18 @@ socket.on("state", function(players,projectiles){
       context.arc(player.location.x,player.location.y,10,0,2*Math.PI);
       context.fill();
 
+      //player name centered
       context.fillStyle = "black"
-      context.fillText(player.name + " " + player.health,player.location.x-10,player.location.y-12);
+      context.fillText(player.name + " (" + player.health + ")",player.location.x-player.name.length*2.5,player.location.y-12);
     }
     
   }
   // var node = "kills " + players[socketId].kills
   // + " deaths"  + players[socketId].deaths;
   // playerStats.
+  // topKills = leaderboard(players);
+  // console.log(topKills);
 
-  document.getElementById("playerStats").innerHTML = "kills " + players[socketId].kills
-   + " deaths "  + players[socketId].deaths;  
+  document.getElementById("playerStats").innerHTML = "Kills: " + players[socketId].kills
+   + " Deaths: "  + players[socketId].deaths;  
 })

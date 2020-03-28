@@ -35,8 +35,12 @@ function update(){
   projectileUpdate();
   Collisions(players,projectiles);
   //constantly emits all the player and projectile data to all the other players
-  IO.sockets.emit("state",players,projectiles);  
+  // IO.sockets.emit("state",players,projectiles);  
 }
+
+setInterval(function(){
+  IO.sockets.emit("state",players,projectiles); 
+},1000/30);
 
 //For setting random Colour of user(maybe move to player class)
 function getRandomColour(){
@@ -142,7 +146,7 @@ IO.on("connection", function(socket){
             }
             //temporary fix for input speed stacking issue
             if(data.left && data.right){
-              yval *= 0.5;
+              yval *= 0.4;
               // console.log(xval,yval);
             }
           }
