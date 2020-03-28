@@ -35,7 +35,7 @@ function leaderboardFunction(players){
     var player = players[id];
     arr.push(player);
   }
-  console.log(arr);
+  // console.log(arr);
   if(arr.length>1){
     topKills = arr.sort(compare);
     // console.log(topKills);
@@ -124,7 +124,7 @@ document.addEventListener("keydown", function(event){
 //add a new player when join button is clicked
 joinButton.addEventListener("click", function(){
   userName = nameInput.value;
-  console.log(userName);
+  // console.log(userName);
     if(userName === ""){
       userName = "anon"
     }
