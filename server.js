@@ -156,11 +156,9 @@ IO.on("connection", function(socket){
           //collision detection for edge of map(hardcoded for now)
           function mapEdgeCollision(){
             if(((player.location.x + xval) <= 0) || ((player.location.x + xval) >= 400)){
-              console.log("off x");
               xval = 0;
             }
             if(((player.location.y + yval) >= 400) || ((player.location.y + yval) <= 0)){
-              console.log("off y");
               yval = 0;
             }    
           }          

@@ -5,6 +5,7 @@ var socket = io.connect();
 var joinButton = document.getElementById("joinButton");
 var nameInput = document.getElementById("nameInput");
 var canvas = document.getElementById("canvas");
+var leaderboard = document.getElementById("leaderboard");
 
 var userName;
 var mousePos;
@@ -24,19 +25,36 @@ var topKills = [];
 
 // import leadboard, { leaderboard } from "./leaderboard";
 
-function leaderboard(...players){
-  // players.sort(compare);
-  return players.sort(compare);
+function leaderboardFunction(players){  
+  var arr = [];
+  var leaderboardHtml = "";
+  // console.log(playersList[0]);
+  // console.log(playersList[1]);
+
+  for (var id in players) {
+    var player = players[id];
+    arr.push(player);
+  }
+  console.log(arr);
+  if(arr.length>1){
+    topKills = arr.sort(compare);
+    // console.log(topKills);
+     //string to print top 5 players
+    for(i = 0;i<arr.length;i++){
+      leaderboardHtml += "<li>" + topKills[i].name + " Kills: " + topKills[i].kills + " Deaths: " + topKills[i].deaths + "</li>";   
+    }
+  }
+  leaderboard.innerHTML = leaderboardHtml;
 }
 
 function compare(a,b){
   var playerKillsA = a.kills;
-  var playersKillsB = b.kills;
-  if(playersKillsA > playersKillsB){
-      return 1;
-  }
-  if(playersKillsB > playersKillsA){
+  var playerKillsB = b.kills;
+  if(playerKillsA > playerKillsB){
       return -1;
+  }
+  if(playerKillsB > playerKillsA){
+      return 1;
   }
   return 0;
 }
@@ -95,11 +113,11 @@ document.addEventListener("mousemove",function(event){
   //console.log(mousePos);
 });
 
-
 //shoot a bullet when the spacebar is pressed
 document.addEventListener("keydown", function(event){
   if(event.keyCode === 32 ){
     socket.emit("shoot", mousePos);
+    event.preventDefault();
   }
 });
 
@@ -127,10 +145,6 @@ setInterval(function(){
     }
 },1000/30);
 
-//listening for game messages
-socket.on("game",function(data){
-    // console.log(data);
-});
 var socketId;
 socket.on("connect",function(){
   socketId = socket.id;
@@ -177,14 +191,10 @@ socket.on("state", function(players,projectiles){
       context.fillStyle = "black"
       context.fillText(player.name + " (" + player.health + ")",player.location.x-player.name.length*2.5,player.location.y-12);
     }
-    
   }
-  // var node = "kills " + players[socketId].kills
-  // + " deaths"  + players[socketId].deaths;
-  // playerStats.
-  // topKills = leaderboard(players);
-  // console.log(topKills);
-
+  //updates leaderboard
+  leaderboardFunction(players);
+  //updates player stats
   document.getElementById("playerStats").innerHTML = "Kills: " + players[socketId].kills
    + " Deaths: "  + players[socketId].deaths;  
 })
