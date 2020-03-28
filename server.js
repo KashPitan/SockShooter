@@ -180,7 +180,7 @@ IO.on("connection", function(socket){
         //creates a projectile and adds it to server side projectile array
         //only spawns a bullet if the player has less than 3 on screen already
         console.log(players[socket.id].alive);
-        if(player.projectiles.length < 4){
+        if(player.projectiles.length < 5){
           projectiles.push(player.shoot(data));
           // console.log("spawning projectile");
           // console.log(projectiles);

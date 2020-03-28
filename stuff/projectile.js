@@ -5,7 +5,7 @@ var Projectile = function(id,origin,updateVector,projectileId){
       projectileId: projectileId,
       origin:origin,
       location: {x:origin.x,y:origin.y},
-      velocity: 3,
+      velocity: 2.5,
       updateVector: updateVector,
       update: function(){
         // console.log(this.updateVector);
