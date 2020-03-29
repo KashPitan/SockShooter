@@ -1,3 +1,39 @@
-#canvas {
-    border: 1px solid blue;
+body{
+    margin:0px;
 }
+.header{
+    padding:10px;
+    text-align: center;
+    background:black;
+    color:white;
+    margin:0px;
+}
+h1{
+  background-color: black;
+  color: white;
+  text-align: center;
+}
+p.header-text{
+    font-family: arial;
+    margin:5px;
+}
+#canvas {
+    border: 2px solid black;
+    margin-top: 10px;
+    /* margin-left: 60px; */
+    margin-left: 10%;
+}
+.container{
+    display:flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items:flex-start;
+}
+#joinInput{
+    text-align: center;
+}
+#how-to-play{
+    text-align:center;
+}
+ul{list-style-position: inside;}
+

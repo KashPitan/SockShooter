@@ -1,4 +1,3 @@
-
 var socket = io.connect();
 
 //document elements
@@ -22,8 +21,6 @@ var deaths;
 
 //array for storing the top 5 killers
 var topKills = [];
-
-// import leadboard, { leaderboard } from "./leaderboard";
 
 function leaderboardFunction(players){  
   var arr = [];
