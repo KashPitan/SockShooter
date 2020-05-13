@@ -76,7 +76,7 @@ function projectileUpdate(){
 IO.on("connection", function(socket){
     console.log("socket connection made", socket.id);
     //create player upon connection
-    players[socket.id] = Player("",socket.id,getRandomColour());
+    players[socket.id] = Player("Anon",socket.id,getRandomColour());
 
     //game loop
     setInterval(function(){
